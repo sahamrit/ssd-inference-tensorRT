@@ -16,6 +16,7 @@ class SSD300(torch.nn.Module):
         self.model = torch.hub.load("NVIDIA/DeepLearningExamples:torchhub", "nvidia_ssd", model_math=model_precision)
         self.nms_thresh = nms_thresh
         self.conf_thresh = conf_thresh
+        self.model_precision = model_precision
         
         self.preprocess_transforms = transforms.Compose(
                         [
@@ -84,15 +85,15 @@ class SSD300(torch.nn.Module):
             flat_score[nms_mask].cpu(),
         )
 
-        output = [[[], [], []] for _ in range(bsz)]
-        for bbox, lbl, score in zip(flat_bbox, encode_lbl, flat_score):
-            decode_lbl = int(lbl) % num_classes
-            decode_img_id = int(lbl) // num_classes
-            output[decode_img_id][0].append(bbox)
-            output[decode_img_id][1].append(decode_lbl)
-            output[decode_img_id][2].append(score)
+        # output = [[[], [], []] for _ in range(bsz)]
+        # for bbox, lbl, score in zip(flat_bbox, encode_lbl, flat_score):
+        #     decode_lbl = int(lbl) % num_classes
+        #     decode_img_id = int(lbl) // num_classes
+        #     output[decode_img_id][0].append(bbox)
+        #     output[decode_img_id][1].append(decode_lbl)
+        #     output[decode_img_id][2].append(score)
 
-        return output
+        return flat_bbox, encode_lbl, flat_score
     
     def forward(self, input_tensor : torch.Tensor) -> List[Tuple[List, List, List]]:
         """Input
